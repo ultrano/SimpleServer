@@ -3,6 +3,18 @@
 
 public partial class MainWindow
 {
+	private global::Gtk.Notebook notebook1;
+
+	private global::Gtk.VBox vbox1;
+
+	private global::Gtk.Button ListenButton;
+
+	private global::Gtk.ScrolledWindow GtkScrolledWindow;
+
+	private global::Gtk.TextView LogView;
+
+	private global::Gtk.Label label3;
+
 	protected virtual void Build()
 	{
 		global::Stetic.Gui.Initialize(this);
@@ -10,6 +22,46 @@ public partial class MainWindow
 		this.Name = "MainWindow";
 		this.Title = global::Mono.Unix.Catalog.GetString("MainWindow");
 		this.WindowPosition = ((global::Gtk.WindowPosition)(4));
+		// Container child MainWindow.Gtk.Container+ContainerChild
+		this.notebook1 = new global::Gtk.Notebook();
+		this.notebook1.CanFocus = true;
+		this.notebook1.Name = "notebook1";
+		this.notebook1.CurrentPage = 0;
+		// Container child notebook1.Gtk.Notebook+NotebookChild
+		this.vbox1 = new global::Gtk.VBox();
+		this.vbox1.Name = "vbox1";
+		this.vbox1.Spacing = 6;
+		// Container child vbox1.Gtk.Box+BoxChild
+		this.ListenButton = new global::Gtk.Button();
+		this.ListenButton.CanFocus = true;
+		this.ListenButton.Name = "ListenButton";
+		this.ListenButton.UseUnderline = true;
+		this.ListenButton.Label = global::Mono.Unix.Catalog.GetString("Listen");
+		this.vbox1.Add(this.ListenButton);
+		global::Gtk.Box.BoxChild w1 = ((global::Gtk.Box.BoxChild)(this.vbox1[this.ListenButton]));
+		w1.Position = 0;
+		w1.Expand = false;
+		w1.Fill = false;
+		// Container child vbox1.Gtk.Box+BoxChild
+		this.GtkScrolledWindow = new global::Gtk.ScrolledWindow();
+		this.GtkScrolledWindow.Name = "GtkScrolledWindow";
+		this.GtkScrolledWindow.ShadowType = ((global::Gtk.ShadowType)(1));
+		// Container child GtkScrolledWindow.Gtk.Container+ContainerChild
+		this.LogView = new global::Gtk.TextView();
+		this.LogView.CanFocus = true;
+		this.LogView.Name = "LogView";
+		this.GtkScrolledWindow.Add(this.LogView);
+		this.vbox1.Add(this.GtkScrolledWindow);
+		global::Gtk.Box.BoxChild w3 = ((global::Gtk.Box.BoxChild)(this.vbox1[this.GtkScrolledWindow]));
+		w3.Position = 1;
+		this.notebook1.Add(this.vbox1);
+		// Notebook tab
+		this.label3 = new global::Gtk.Label();
+		this.label3.Name = "label3";
+		this.label3.LabelProp = global::Mono.Unix.Catalog.GetString("home");
+		this.notebook1.SetTabLabel(this.vbox1, this.label3);
+		this.label3.ShowAll();
+		this.Add(this.notebook1);
 		if ((this.Child != null))
 		{
 			this.Child.ShowAll();
@@ -18,5 +70,6 @@ public partial class MainWindow
 		this.DefaultHeight = 300;
 		this.Show();
 		this.DeleteEvent += new global::Gtk.DeleteEventHandler(this.OnDeleteEvent);
+		this.ListenButton.Clicked += new global::System.EventHandler(this.OnListenButtonClicked);
 	}
 }
