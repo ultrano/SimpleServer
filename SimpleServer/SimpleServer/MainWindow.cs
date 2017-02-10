@@ -39,17 +39,9 @@ public partial class MainWindow : Gtk.Window
 			g_listener.Bind(localEndPoint);
 			g_listener.Listen(100);
 
-			ThreadStart acceptThread = delegate ()
-			{
-				while (true)
-				{
 					var args = new SocketAsyncEventArgs();
-					args.Completed += OnAccepted;
-					StartAccept(args);
-				}
-			};
-
-			new Thread(acceptThread).Start();
+			args.Completed += OnAccepted;
+			StartAccept(args);
 
 			Log("Listening has been started");
 		}
@@ -67,19 +59,24 @@ public partial class MainWindow : Gtk.Window
 	{
 		args.AcceptSocket = null;
 
+		Log("Start accept");
 		if (!g_listener.AcceptAsync(args))
 			ProcessAccept(args);
-	}
-
-	private void ProcessAccept(SocketAsyncEventArgs args)
-	{
-		Player player = new Player(args.AcceptSocket);
-		player.SendAsync(Encoding.UTF8.GetBytes("hello there?"));
 	}
 
 	private void OnAccepted(object sender, SocketAsyncEventArgs args)
 	{
 		ProcessAccept(args);
+	}
+
+	private void ProcessAccept(SocketAsyncEventArgs args)
+	{
+		Log("A Player's accepted");
+		Player player = new Player(args.AcceptSocket);
+		byte[] data = Encoding.UTF8.GetBytes("hello there?");
+		Log("data: "+data.Length);
+		player.SendAsync(data);
+		StartAccept(args);
 	}
 
 	public void Log(string message)
@@ -149,10 +146,11 @@ public class Player
 
 	public void SendAsync(byte[] buf)
 	{
-		Buffer.BlockCopy(buf, 0, sendBuf, 0, sendBuf.Length);
+		int length = Math.Min(buf.Length, sendBuf.Length);
+		Buffer.BlockCopy(buf, 0, sendBuf, 0, length);
 
-		if (!socket.SendAsync(recvArgs))
-			ProcessSend(recvArgs);
+		if (!socket.SendAsync(sendArgs))
+			ProcessSend(sendArgs);
 	}
 
 	private void ProcessReceive(SocketAsyncEventArgs args)
