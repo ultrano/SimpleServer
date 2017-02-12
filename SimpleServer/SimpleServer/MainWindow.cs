@@ -143,8 +143,8 @@ public class Player
 		int length = Math.Min(sendBuf.Length, buf.Length);
 		Buffer.BlockCopy(buf, 0, sendBuf, 0, length);
 
-		if (!socket.SendAsync(recvArgs))
-			ProcessSend(recvArgs);
+		if (!socket.SendAsync(sendArgs))
+			ProcessSend(sendArgs);
 	}
 
 	private void ProcessReceive(SocketAsyncEventArgs args)
