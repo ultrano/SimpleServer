@@ -7,8 +7,10 @@ using System.Threading;
 
 public partial class MainWindow : Gtk.Window
 {
+	public static MainWindow instance = null;
 	public MainWindow() : base(Gtk.WindowType.Toplevel)
 	{
+		instance = this;
 		Build();
 	}
 
@@ -25,7 +27,7 @@ public partial class MainWindow : Gtk.Window
 	public System.Net.Sockets.Socket g_listener = null;
 
 	// waitting player
-	//StateObject waitingPlayer = null;
+	Player waitingPlayer = null;
 
 	public void LetListen()
 	{
@@ -39,17 +41,9 @@ public partial class MainWindow : Gtk.Window
 			g_listener.Bind(localEndPoint);
 			g_listener.Listen(100);
 
-			ThreadStart acceptThread = delegate ()
-			{
-				while (true)
-				{
-					var args = new SocketAsyncEventArgs();
-					args.Completed += OnAccepted;
-					StartAccept(args);
-				}
-			};
-
-			new Thread(acceptThread).Start();
+			var args = new SocketAsyncEventArgs();
+			args.Completed += OnAccepted;
+			StartAccept(args);
 
 			Log("Listening has been started");
 		}
@@ -74,7 +68,18 @@ public partial class MainWindow : Gtk.Window
 	private void ProcessAccept(SocketAsyncEventArgs args)
 	{
 		Player player = new Player(args.AcceptSocket);
-		player.SendAsync(Encoding.UTF8.GetBytes("hello there?"));
+		if (waitingPlayer != null)
+		{
+			waitingPlayer.opponent = player;
+			player.opponent = waitingPlayer;
+			waitingPlayer = null;
+		}
+		else
+		{
+			waitingPlayer = player;
+		}
+
+		StartAccept(args);
 	}
 
 	private void OnAccepted(object sender, SocketAsyncEventArgs args)
@@ -82,10 +87,10 @@ public partial class MainWindow : Gtk.Window
 		ProcessAccept(args);
 	}
 
-	public void Log(string message)
+	public static void Log(string message)
 	{
-		LogView.Buffer.Text += message;
-		LogView.Buffer.Text += "\n";
+		instance.LogView.Buffer.Text += message;
+		instance.LogView.Buffer.Text += "\n";
 	}
 
 	protected void OnListenButtonClicked(object sender, EventArgs e)
@@ -94,20 +99,6 @@ public partial class MainWindow : Gtk.Window
 	}
 }
 
-/* // determine which type of operation just completed and call the associated handler
-        switch (e.LastOperation)
-        {
-            case SocketAsyncOperation.Receive:
-                ProcessReceive(e);
-                break;
-            case SocketAsyncOperation.Send:
-                ProcessSend(e);
-                break;
-            default:
-                throw new ArgumentException("The last operation completed on the socket was not a receive or send");
-        }   */
-//EventHandler<SocketAsyncEventArgs>
-// State object for reading client data asynchronously
 public class Player
 {
 	public const int BufferSize = 64;
@@ -159,6 +150,7 @@ public class Player
 	{
 		if (args.BytesTransferred > 0 && args.SocketError == SocketError.Success)
 		{
+			MainWindow.Log("got packet from player");
 			if (opponent != null)
 				opponent.SendAsync(args.Buffer);
 			
