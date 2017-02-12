@@ -72,6 +72,8 @@ public partial class MainWindow : Gtk.Window
 		{
 			waitingPlayer.opponent = player;
 			player.opponent = waitingPlayer;
+			waitingPlayer.SendAsync(new byte[] { 1 });
+			player.SendAsync(new byte[] { 1 });
 			waitingPlayer = null;
 		}
 		else
